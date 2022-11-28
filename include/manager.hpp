@@ -1,5 +1,5 @@
 /**
- *  @file   Manager.hpp
+ *  @file   manager.hpp
  *  @brief  Manager Service.
  *  @author Vikram Bhattacharjee
  *  @date  2022-11-26
