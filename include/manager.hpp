@@ -62,9 +62,9 @@ private:
         for (DataReaderIterator loop(&file); loop != DataReaderIterator(); ++loop)
         {
             try {
-				DeviceIdx index = stoi((*loop)[1]);
-				marketIdx.insert(index);
-			}
+		    DeviceIdx index = stoi((*loop)[1]);
+		    marketIdx.insert(index);
+	    }
             catch (const exception& e) {
 				std::lock_guard<std::mutex> lk(exceptionMutex);
 				exceptions.push_back(e);
