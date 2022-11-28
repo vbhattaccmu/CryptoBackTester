@@ -55,6 +55,7 @@ struct MarketData {
     DeviceIdx index;
     Price price;
     Size size;
+    std::string symbol;
 };
 
 /*
