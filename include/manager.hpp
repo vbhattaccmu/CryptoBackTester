@@ -41,7 +41,7 @@ private:
 		std::thread readerThread(triggerReader, fileHandle, timestamp);
 		std::thread ManagerMatcher(orderMatcher);
 
-     	readerThread.join();
+     	        readerThread.join();
 		ManagerMatcher.join();
 
 		// exception handling 
