@@ -66,8 +66,8 @@ private:
 		    marketIdx.insert(index);
 	    }
             catch (const exception& e) {
-				std::lock_guard<std::mutex> lk(exceptionMutex);
-				exceptions.push_back(e);
+		    std::lock_guard<std::mutex> lk(exceptionMutex);
+		    exceptions.push_back(e);
             }
         }
         
