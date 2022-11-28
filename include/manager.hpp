@@ -1,5 +1,5 @@
 /**
- *  @file   manager.hpp
+ *  @file   Manager.hpp
  *  @brief  Manager Service.
  *  @author Vikram Bhattacharjee
  *  @date  2022-11-26
@@ -65,7 +65,7 @@ private:
 				DeviceIdx index = stoi((*loop)[1]);
 				marketIdx.insert(index);
 			}
-            catch (const exception& e) {
+            catch (const std::exception& e) {
 				std::lock_guard<std::mutex> lk(exceptionMutex);
 				exceptions.push_back(e);
             }
@@ -89,7 +89,7 @@ private:
 					}
 					nextOrder.fetch_add(1);
 				}
-				catch (const exception& e) {
+				catch (const std::exception& e) {
 					std::lock_guard<std::mutex> lk(exceptionMutex);
 					exceptions.push_back(e);
 					success = false;
