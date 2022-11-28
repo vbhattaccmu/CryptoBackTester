@@ -22,7 +22,7 @@ public:
 	}
 
 	std::istream* start() {
-		if (data == "Options") {
+		if (data == "Binance") {
 			rfile.open("DATA_TYPE1.csv");
 		}
 		else {
