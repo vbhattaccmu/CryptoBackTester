@@ -1,9 +1,11 @@
 {
   "ExpandedNodes": [
     "",
+    "\\include",
     "\\include\\ccapi_cpp",
+    "\\include\\ccapi_cpp\\service",
     "\\src"
   ],
-  "SelectedNode": "\\README.md",
+  "SelectedNode": "\\include\\ccapi_cpp\\ccapi_request.h",
   "PreviewInSolutionExplorer": false
 }
