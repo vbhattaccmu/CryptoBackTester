@@ -28,7 +28,7 @@ using namespace std::chrono;
 class Manager {
 protected:
 	Manager() {
-		for (std::size_t i = 0; i < MAX_INSTRUMENT_SIZE; i++) {
+		for (std::size_t i = 0; i < MAX_DEVICE_SIZE; i++) {
 			marketIdx.insert(i);
 		}
 	}
