@@ -1,6 +1,6 @@
 /**
- *  @file   backtester.cpp
- *  @brief  A simple backtester with Order Management and Matching Engine in C++.
+ *  @file   main.cpp
+ *  @brief  A simple crypto backtester with Order Management and Matching Engine in C++.
  *  @author Vikram Bhattacharjee
  *  @date  2022-11-26
  ***********************************************/
