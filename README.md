@@ -1,1 +1,1 @@
-# A Minimal Crypto Market BackTester with Strategy builder 
+# A Minimal Crypto Market BackTester 
