@@ -1,2 +1,1 @@
-# WIP: CryptoBackTester
-The code is broken currently.
+# A Minimal Crypto Market BackTester with Strategy builder 
