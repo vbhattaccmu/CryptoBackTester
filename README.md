@@ -1,1 +1,1 @@
-# A Minimal Crypto Market BackTester 
+# A Minimal Market BackTester 
