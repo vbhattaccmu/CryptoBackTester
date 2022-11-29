@@ -1,2 +1,2 @@
-### A Minimal Market BackTester 
+### A Minimal Crypto Market BackTester 
 The branch is currently WIP.
