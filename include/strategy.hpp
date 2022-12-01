@@ -13,7 +13,7 @@
 #include "strategyFactory.hpp"
 #include "oms.hpp"
 
-class Strategy {
+class Strategy: public AbstractStratFactory {
 public:	
 	Strategy(std::string marketData, InstrumentIdx idx) {
 		listIdx.reserve(MAX_INSTRUMENT_SIZE);

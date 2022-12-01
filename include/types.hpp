@@ -18,7 +18,7 @@ typedef int InstrumentIdx;
 typedef int Price;
 
 const Size MAX_ORDER_SIZE = 10000;
-const Size MAX_DEVICE_SIZE = 50;
+const Size MAX_INSTRUMENT_SIZE = 50;
 
 /*
 * TradeType enum (Buy/Sell)

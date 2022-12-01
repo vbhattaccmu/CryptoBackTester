@@ -28,7 +28,7 @@ using namespace std::chrono;
 */
 class OMS {
 public:
-	OMS(Strategy* strategy) {
+	OMS(AbstractStratFactory* strategy) {
 		for (std::size_t i = 0; i < MAX_INSTRUMENT_SIZE; i++) {
 			marketIdx.insert(i);
 		}
@@ -172,7 +172,7 @@ public:
     // Market State is saved currently as    
 	// std::unordered_map<InstrumentIdx, std::pair<Size, bool>> map;
 	MarketStatus* marketdataStatus;
-	Strategy* strategy_;
+	AbstractStratFactory* strategy_;
 
 	// synchronization primitives
 	std::mutex orderSynchroniationMutex;
