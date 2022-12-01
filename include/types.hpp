@@ -10,10 +10,11 @@
 
 #include <sstream>
 #include <vector>
-#include "reader.hpp"
+#include "unordered_map"
+#include "mdr.hpp"
 
 typedef int Size;
-typedef int DeviceIdx;
+typedef int InstrumentIdx;
 typedef int Price;
 
 const Size MAX_ORDER_SIZE = 10000;
@@ -33,11 +34,15 @@ enum class TradeType {
 */
 struct Order {
     Order() {}
-    Order(DeviceIdx _index, Price _price, Size _size, int64_t _orderID, TradeType _type) :
+    Order(InstrumentIdx _index, Price _price, Size _size, int64_t _orderID, TradeType _type) :
         index{ _index }, price{ _price }, size{ _size }, type{ _type }, orderID(_orderID) {}
     ~Order() = default;
 
-    DeviceIdx index;
+    void print() {
+        std::cout << this->index << this->orderID << this->price << this->size << std::endl;
+    }
+
+    InstrumentIdx index;
     int64_t orderID;
     Price price;
     Size size;
@@ -52,27 +57,28 @@ struct Order {
 #pragma pack (4)
 struct MarketData {
     int64_t timestamp;
-    DeviceIdx index;
+    InstrumentIdx index;
     Price price;
     Size size;
-    std::string symbol;
 };
 
 /*
-* MarketStatus struct
+* MarketState struct
+* Attributes: bidPrice, askPrice, bidSize, askSize
 */
 struct MarketStatus {
     Size quantity;
     bool isLeft;
-    std::unordered_map<DeviceIdx, std::pair<Size, bool>> map;
+    std::unordered_map<InstrumentIdx, std::pair<Size, bool>> map;
 
     MarketStatus() {
         quantity = 0;
         isLeft = false;
     }
-    void updateState(DeviceIdx _idx, bool _isLeft) {
-        if (map.find(_idx) != map.end()) {
-            // todo
+    void updateState(InstrumentIdx _idx, bool _isLeft) {
+        if (map.find(_idx) == map.end()) {
+            map[_idx].first = _idx;
+            map[_idx].second = _isLeft;
         }        
     }
 

@@ -1,6 +1,6 @@
 /**
- *  @file   reader.hpp
- *  @brief  A generic Data Reader class.
+ *  @file   mdr.hpp
+ *  @brief  A generic MDR class.
  *  @author Vikram Bhattacharjee
  *  @date  2022-11-26
  ***********************************************/
@@ -17,21 +17,21 @@
 #include <string>
 
  /*
- * DataReader class
+ * MDR class
  * Attributes: marketData
- * friend class: DataReaderIterator
+ * friend class: MDRIterator
  */
-class DataReader
+class MDR
 {
 private:
     std::vector<std::string> marketData;
     std::string line, cell;
-    friend class DataReaderIterator;
+    friend class MDRIterator;
 
 protected:
-    DataReader() {}
+    MDR() {}
 
-    ~DataReader() {
+    ~MDR() {
         marketData.clear();
         line.clear();
         cell.clear();
@@ -53,45 +53,46 @@ public:
         while (std::getline(lineStream, cell, ',')) {
             marketData.emplace_back(cell);
             cell.clear();
+            break;
         }
     }
 
     // operator overload on >> to allow iterator to call `readNextEvent`
-    friend std::istream& operator>>(std::istream& str, DataReader& DataReader) {
-        DataReader.readNextEvent(str);
+    friend std::istream& operator>>(std::istream& str, MDR& mdr) {
+        mdr.readNextEvent(str);
         return str;
     }
 };
 
 
 /*
-* DataReaderIterator
-* Description: Iterator for DataReader
+* MDRIterator
+* Description: Iterator for MDR
 */
-class DataReaderIterator {
+class MDRIterator {
 public:
     typedef std::input_iterator_tag iterator_category;
     typedef std::size_t difference_type;
-    typedef DataReader value_type;
-    typedef DataReader* pointer;
-    typedef DataReader& reference;
+    typedef MDR value_type;
+    typedef MDR* pointer;
+    typedef MDR& reference;
 
-    DataReaderIterator(std::istream& str): m_str(str.good() ? &str : NULL) { ++(*this); }
+    MDRIterator(std::istream& str): m_str(str.good() ? &str : NULL) { ++(*this); }
 
-    DataReaderIterator(): m_str(NULL) {}
+    MDRIterator(): m_str(NULL) {}
 
     // operator overload on ++ to allow post increment 
-    DataReaderIterator operator++(int) {
-        DataReaderIterator tmp(*this);
+    MDRIterator operator++(int) {
+        MDRIterator tmp(*this);
         ++(*this);
         return tmp;
     }
 
     // operator overload on ++ to allow pre increment. 
-    // utilized by friend function in parent DataReader class to call `readNextEvent`
-    DataReaderIterator& operator++() {
+    // utilized by friend function in parent MDR class to call `readNextEvent`
+    MDRIterator& operator++() {
         if (m_str) {
-            if (!((*m_str) >> DataReader_)) {
+            if (!((*m_str) >> mdr_)) {
                 m_str = NULL;
             }
         }
@@ -99,17 +100,17 @@ public:
     }
 
     // other relevant operator overloads
-    DataReader const& operator*() const { return DataReader_; }
-    DataReader const* operator->() const { return &DataReader_; }
-    bool operator==(DataReaderIterator const& rhs) {
+    MDR const& operator*() const { return mdr_; }
+    MDR const* operator->() const { return &mdr_; }
+    bool operator==(MDRIterator const& rhs) {
         return ((this == &rhs) || ((this->m_str == NULL) && (rhs.m_str == NULL)));
     }
-    bool operator!=(DataReaderIterator const& rhs) {
+    bool operator!=(MDRIterator const& rhs) {
         return !((*this) == rhs);
     }
 
 private:
     std::istream* m_str;
-    DataReader DataReader_;
+    MDR mdr_;
 };
 #endif

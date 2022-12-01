@@ -5,48 +5,78 @@
  *  @date  2022-11-26
  ***********************************************/
 
-#include <vector>
-#include "types.hpp"
-#include "strategyFactory.hpp"
-#include "manager.hpp"
-
 #ifndef _STRATEGY__HPP__
 #define _SRATEGY__HPP__
 
-class Strategy: public AbstractStratFactory {
+#include <vector>
+#include "types.hpp"
+#include "strategyFactory.hpp"
+#include "oms.hpp"
+
+class Strategy {
 public:	
-	Strategy(std::string marketData, DeviceIdx idx) {
+	Strategy(std::string marketData, InstrumentIdx idx) {
 		listIdx.reserve(MAX_INSTRUMENT_SIZE);
 		data = marketData;
 		listIdx.emplace_back(idx);
 	}
 
 	std::istream* start() {
-		if (data == "Binance") {
-			rfile.open("DATA_TYPE1.csv");
+		if (data == "MarketData") {
+			rfile.open("20220603.csv");
 		}
 		else {
-			rfile.open("DATA_TYPE2.csv");
+			rfile.open("20220603_prints.csv");
 		}
 		return &rfile;
 	}
-
-	bool processOrder(Order& order) {
+	/*
+	* sendOrder is an interface to submit orders from strategy to OMS.
+	*/
+	bool sendOrder(Order& order, std::vector<Order>& orderBook) {
 		std::cout << "Order received..sending to Management Service" << std::endl;
-		// update order to order book
-		manager->orderBook.emplace_back(order);
-		// increment order count by 1
-		manager->orderCount.fetch_add(1);
-		// synchronize all threads listening to manager
-		manager->orderSyncCond.notify_one();
+		orderBook.emplace_back(order);
 		std::cout << "Order sent successfully ." << std::endl;
-
 		return true;
 	}
 
-	void halt() {
+	/*
+	* fillOrder updates current portfolio 
+	* updated if order is matched.
+	*/
+	bool fillOrder(Order& order) {
+		portflio.orders.push_back(order);
+		return true;
+	}
+
+	/*
+	* onMarketDataUpdate is void for now
+	*/
+	void onMarketDataUpdate(Order& order) {
+		return;
+	}
+
+	/*
+	* onPrint is void for now
+	*/
+	void onPrint() {
+		return;
+	}
+
+	/*
+	* clear current strategy, print day' portfilio.
+	* 
+	*/
+	void stop() {
+		std::cout << "Your current portfolio.." << std::endl;
+		std::cout << "Instrument" << "OrderID" << "Price" << "Size" << std::endl;
+		for (auto order : portflio.orders) {
+			order.print();
+		}
 		std::cout << "Starting cleanup.." << std::endl;
 		listIdx.clear();
+		portflio.orders.clear();
+		delete &rfile;
 		std::cout << "Cleanup complete.." << std::endl;
 	}
 
@@ -57,8 +87,7 @@ public:
 private:
 	Portfolio portflio;
 	std::ifstream rfile;
-	std::vector<DeviceIdx> listIdx;
+	std::vector<InstrumentIdx> listIdx;
 	std::string data;
-	Manager* manager;
 };
 #endif
