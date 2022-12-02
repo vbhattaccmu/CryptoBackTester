@@ -63,27 +63,58 @@ public:
 	}
 
 	void triggerReader() {
+		// 0. preliminary setup
+		static int64_t _timestamp;
+		static Price _bidPrice;
+		static Price _askPrice;
+		static Size _bidSize;
+		static Size _askSize;
+		static bool _aggregator;
+
 		// 1. get file handle from strategy
-		auto fileHandle = strategy_->start();
-		int64_t timestamp = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+		auto strat_ = strategy_->start();
+		auto fileHandle = strat_.first;
 
 		// 2. Read MDR in a loop from the file handle
-        for (MDRIterator loop(*fileHandle); loop != MDRIterator(); ++loop)
-        {
-            try {
-				InstrumentIdx index = stoi((*loop)[1]);
+		for (MDRIterator loop(*fileHandle); loop != MDRIterator(); ++loop)
+		{
+			try {
+				// save data to market maps.
+				InstrumentIdx index = stoi((*loop)[SLOT1]);
+				if (strat_.second == marketData) {
+
+					_timestamp = stoi((*loop)[SLOT0]);
+					_bidPrice = stoi((*loop)[SLOT2]);
+					_askPrice = stoi((*loop)[SLOT3]);
+					_bidSize = stoi((*loop)[SLOT4]);
+					_askSize = stoi((*loop)[SLOT5]);
+					MarketData data = MarketData(_timestamp, index, _bidPrice, _askPrice, _bidSize, _askSize);
+					// update data to cache
+					marketdataStatus->marketDataMap[index].push_back(data);
+				}
+				else {
+					_timestamp = stoi((*loop)[SLOT0]);
+					_bidPrice = stoi((*loop)[SLOT2]);
+					_askPrice = stoi((*loop)[SLOT3]);
+					_aggregator = stoi((*loop)[SLOT4]) > 0 ? true : false;
+					PrintData data = PrintData(_timestamp, index, _bidPrice, _askPrice, _aggregator);
+
+					marketdataStatus->printDataMap[index].push_back(data);
+
+				}
 				marketIdx.insert(index);
 			}
-            catch (const std::exception& e) {
+			catch (const std::exception& e) {
 				std::lock_guard<std::mutex> lk(exceptionMutex);
 				exceptions.push_back(e);
-            }
-        }
+			}
+		}
 		// at the end of the day stop the strategy and print portfolio.
 		strategy_->stop();
 	}
 
-    bool orderMatcher() {
+	// this order matcher currently works with MarketData only.
+	bool orderMatcher() {
 		bool success = true;
 		while (true) {
 			std::unique_lock<std::mutex> lk(orderSynchroniationMutex);
@@ -107,30 +138,35 @@ public:
 		}
 		std::cout << "Mathing Process Ended" << std::endl;
 		return (success ? true : false);
-    }
+	}
 
 	bool matchingHelper(Order& order) {
 		auto& cs_map = marketdataStatus->map[order.index];
 		long qty = marketdataStatus->quantity;
+		std::vector<MarketData> marketDataMap{};
+		if (marketdataStatus->marketDataMap.find(order.index) != marketdataStatus->marketDataMap.end()) {
+			marketDataMap = marketdataStatus->marketDataMap[order.index];
+		}
 
-		if (!marketdataStatus->map.empty() or marketdataStatus->isLeft) {
+		if (!marketDataMap.empty() or marketdataStatus->isLeft) {
 			if (marketdataStatus->isLeft) {
 				qty = qty - marketdataStatus->quantity;
 				if (qty >= 0) {
 					marketdataStatus->isLeft = true;
 					if (qty == 0) {
-						// 3.iv. Fill order 
-						strategy_->fillOrder(order);
+						// 3.iv. Fill order, query existing map to check if the order can be filled. 
+						strategy_->fillOrder(order, marketDataMap);
 						// 3.v Update current market state 
 						marketdataStatus->updateState(order.index, marketdataStatus->isLeft);
+
 						return true;
 					}
 				}
 				else {
 					marketdataStatus->quantity = qty * (-1);
 					marketdataStatus->isLeft = true;
-					// 3.iv. Fill order 
-					strategy_->fillOrder(order);
+					// 3.iv. Fill order, query existing map to check if the order can be filled. 
+					strategy_->fillOrder(order, marketDataMap);
 					// 3.v Update current market state 
 					marketdataStatus->updateState(order.index, marketdataStatus->isLeft);
 					return true;
@@ -143,8 +179,8 @@ public:
 						if (qty >= 0) {
 							marketdataStatus->isLeft = false;
 							if (qty == 0) {
-								// 3.iv. Fill order 
-								strategy_->fillOrder(order);
+								// 3.iv. Fill order, query existing map to check if the order can be filled. 
+								strategy_->fillOrder(order, marketDataMap);
 								// 3.v Update current market state 
 								marketdataStatus->updateState(order.index, marketdataStatus->isLeft);
 								return true;
@@ -152,8 +188,8 @@ public:
 						}
 						else {
 							marketdataStatus->quantity = qty * (-1);
-							// 3.iv. Fill order 
-							strategy_->fillOrder(order);
+							// 3.iv. Fill order, query existing map to check if the order can be filled. 
+							strategy_->fillOrder(order, marketDataMap);
 							// 3.v Update current market state 
 							marketdataStatus->updateState(order.index, marketdataStatus->isLeft);
 							return true;
@@ -169,7 +205,7 @@ public:
 	}
 
 public:
-    // Market State is saved currently as    
+	// Market State is saved currently as    
 	// std::unordered_map<InstrumentIdx, std::pair<Size, bool>> map;
 	MarketStatus* marketdataStatus;
 	AbstractStratFactory* strategy_;
@@ -184,6 +220,7 @@ public:
 	std::vector<std::exception> exceptions;
 	// maintain OrderBook for OMS
 	std::vector<Order> orderBook;
+
 	// maintain number of instruments for OMS
 	std::set<InstrumentIdx> marketIdx;
 };

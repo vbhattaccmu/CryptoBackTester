@@ -1,6 +1,6 @@
 /**
  *  @file   strategy.hpp
- *  @brief  Core strategy module.
+ *  @brief  A custom strategy module.
  *  @author Vikram Bhattacharjee
  *  @date  2022-11-26
  ***********************************************/
@@ -13,23 +13,27 @@
 #include "strategyFactory.hpp"
 #include "oms.hpp"
 
-class Strategy: public AbstractStratFactory {
-public:	
+class Strategy : public AbstractStratFactory {
+public:
 	Strategy(std::string marketData, InstrumentIdx idx) {
 		listIdx.reserve(MAX_INSTRUMENT_SIZE);
 		data = marketData;
 		listIdx.emplace_back(idx);
 	}
 
-	std::istream* start() {
-		if (data == "MarketData") {
+	/*
+	* start sets up preliminary requirements for the reader.
+	*/
+	std::pair<std::istream*, std::string> start() {
+		if (data == marketData) {
 			rfile.open("20220603.csv");
 		}
 		else {
 			rfile.open("20220603_prints.csv");
 		}
-		return &rfile;
+		return make_pair(&rfile, data);
 	}
+
 	/*
 	* sendOrder is an interface to submit orders from strategy to OMS.
 	*/
@@ -41,11 +45,13 @@ public:
 	}
 
 	/*
-	* fillOrder updates current portfolio 
+	* fillOrder updates current portfolio
 	* updated if order is matched.
 	*/
-	bool fillOrder(Order& order) {
+	bool fillOrder(Order& order, std::vector<MarketData>& marketDataMap) {
 		portflio.orders.push_back(order);
+		// remove the order from market map since it has been filled.
+		marketDataMap.clear();
 		return true;
 	}
 
@@ -65,7 +71,7 @@ public:
 
 	/*
 	* clear current strategy, print day' portfilio.
-	* 
+	*
 	*/
 	void stop() {
 		std::cout << "Your current portfolio.." << std::endl;
@@ -74,13 +80,12 @@ public:
 			order.print();
 		}
 		std::cout << "Starting cleanup.." << std::endl;
-		listIdx.clear();
 		portflio.orders.clear();
-		delete &rfile;
 		std::cout << "Cleanup complete.." << std::endl;
 	}
 
 	~Strategy() {
+		delete& rfile;
 		listIdx.clear();
 	}
 

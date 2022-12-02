@@ -17,10 +17,10 @@ class AbstractStratFactory {
 public:
     AbstractStratFactory() {}
 
-    virtual std::istream* start() = 0;
+    virtual std::pair<std::istream*, std::string> start() = 0;
     virtual void stop() = 0;
     virtual bool sendOrder(Order& order, std::vector<Order>& orderBook) = 0;
-    virtual bool fillOrder(Order& order) = 0;
+    virtual bool fillOrder(Order& order, std::vector<MarketData>& marketDataMap) = 0;
 	virtual void onMarketDataUpdate(Order& order) = 0;
 	virtual void onPrint() = 0;
 
