@@ -19,6 +19,15 @@ typedef int Price;
 
 const Size MAX_ORDER_SIZE = 10000;
 const Size MAX_INSTRUMENT_SIZE = 50;
+const std::string marketData = "MarketData";
+const std::string printData = "printData";
+
+#define SLOT0 0
+#define SLOT1 1
+#define SLOT2 2
+#define SLOT3 3
+#define SLOT4 4
+#define SLOT5 4
 
 /*
 * TradeType enum (Buy/Sell)
@@ -52,24 +61,55 @@ struct Order {
 
 /*
 * MarketData struct
-* Attributes: timestamp, index, price, size
+* Attributes: bidPrice, askPrice, bidSize, askSize
 */
 #pragma pack (4)
 struct MarketData {
     int64_t timestamp;
     InstrumentIdx index;
-    Price price;
-    Size size;
+    Price bidPrice;
+    Price askPrice;
+    Size bidSize;
+    Size askSize;
+
+    MarketData(int64_t _timestamp, InstrumentIdx _index, Price _bidPrice, Price _askPrice, Size _bidSize, Size _askSize) :
+        timestamp{ _timestamp }, index {_index}, bidPrice{ _bidPrice }, askPrice{ _bidPrice }, bidSize{ _bidSize }, askSize{ _askSize } {}
+    ~MarketData() = default;
+
 };
 
 /*
-* MarketState struct
+* MarketData struct
 * Attributes: bidPrice, askPrice, bidSize, askSize
 */
+#pragma pack (4)
+struct PrintData {
+    int64_t timestamp;
+    InstrumentIdx index;
+    Price bidPrice;
+    Price askPrice;
+    bool aggregator;
+
+    PrintData(int64_t _timestamp, InstrumentIdx _index, Price _bidPrice, Price _askPrice, bool _aggregator) :
+        timestamp{ _timestamp }, index{ _index }, bidPrice{ _bidPrice }, askPrice{ _bidPrice }, aggregator{ _aggregator } {}
+    ~PrintData() = default;
+
+};
+
+
+/*
+* MarketState struct
+* Total volume present per Instrument Idx.
+*/
 struct MarketStatus {
-    Size quantity;
+    Size quantity;// total volume 
     bool isLeft;
+    // InstrumentMap maintains total volume available per instrument
     std::unordered_map<InstrumentIdx, std::pair<Size, bool>> map;
+    // marketDataMap maintains current marketData State 
+    std::unordered_map<InstrumentIdx, std::vector<MarketData>> marketDataMap;
+    // printData maintains current printData State
+    std::unordered_map<InstrumentIdx, std::vector<PrintData>> printDataMap;
 
     MarketStatus() {
         quantity = 0;
@@ -79,7 +119,13 @@ struct MarketStatus {
         if (map.find(_idx) == map.end()) {
             map[_idx].first = _idx;
             map[_idx].second = _isLeft;
-        }        
+        }
+        else {
+            if (!_isLeft) {
+                marketDataMap[_idx].clear();
+                printDataMap[_idx].clear();
+            }
+        }
     }
 
 };

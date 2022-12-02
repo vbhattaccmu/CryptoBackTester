@@ -30,23 +30,24 @@ void runBackTester(AbstractStratFactory* factory) {
 
 void stopBackTester(AbstractStratFactory* factory) {
     factory->stop();
-    delete factory;
 }
-
-
 
 int main()
 {
     std::cout << "Hello Trader!\n";
-
+    
     AbstractStratFactory* factory = new Strategy("MarketData", 0);
 
     try {
+        // run backtester
         runBackTester(factory);
     }
     catch (...) {
+        // stop the service instead of error
         stopBackTester(factory);
     }
+
+    delete factory;
 
     return EXIT_SUCCESS;
 }
