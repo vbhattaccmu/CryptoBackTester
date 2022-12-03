@@ -5,8 +5,8 @@
  *  @date  2022-11-26
  ***********************************************/
 
-#ifndef _READER__HPP__
-#define _READER__HPP__
+#ifndef _MDR__HPP__
+#define _MDR__HPP__
 
 #include <exception>
 #include <fstream>
