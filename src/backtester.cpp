@@ -43,7 +43,6 @@ int main()
         runBackTester(factory);
     }
     catch (...) {
-        // stop the service instead of error
         stopBackTester(factory);
     }
 
