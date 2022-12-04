@@ -21,8 +21,8 @@ public:
     virtual void stop() = 0;
     virtual bool sendOrder(Order& order, std::vector<Order>& orderBook) = 0;
     virtual bool fillOrder(Order& order, std::vector<MarketData>& marketDataMap) = 0;
-	virtual void onMarketDataUpdate(Order& order) = 0;
-	virtual void onPrint() = 0;
+    virtual void onMarketDataUpdate(Order& order) = 0;
+    virtual void onPrint() = 0;
 
     virtual ~AbstractStratFactory() {}
 };
