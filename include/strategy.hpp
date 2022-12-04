@@ -26,10 +26,10 @@ public:
 	*/
 	std::pair<std::istream*, std::string> start() {
 		if (data == marketData) {
-			rfile.open("20220603.csv");
+			rfile.open("MARKET.csv");
 		}
 		else {
-			rfile.open("20220603_prints.csv");
+			rfile.open("ALGO.csv");
 		}
 		return make_pair(&rfile, data);
 	}
